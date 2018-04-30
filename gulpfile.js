@@ -6,6 +6,5 @@ let gulp = require('gulp'),
 boilerplate({
   build: 'appium-tizen-driver',
   jscs: false,
-  e2eTest: {android: true},
   testTimeout: 40000
 });
