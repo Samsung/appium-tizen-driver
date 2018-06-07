@@ -9,7 +9,7 @@
         "mobile",
         "mobile testing"
     ],
-    "version": "1.0.0",
+    "version": "0.1.1",
     "author": "tizen",
     "license": "Apache-2.0",
     "repository": {
@@ -28,7 +28,7 @@
         "lib": "lib"
     },
     "dependencies": {
-        "appium-sdb": "^1.0.0",
+        "appium-sdb": "^0.1.1",
         "appium-base-driver": "^2.0.0",
         "appium-support": "^2.8.0",
         "asyncbox": "^2.0.4",
@@ -48,7 +48,6 @@
         "test": "gulp once",
         "watch": "gulp watch",
         "build": "gulp transpile",
-        "e2e-test": "gulp e2e-test",
         "mocha": "mocha",
         "precommit-msg": "echo 'Pre-commit checks...' && exit 0",
         "precommit-test": "REPORTER=dot gulp once",
