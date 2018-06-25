@@ -9,7 +9,7 @@
         "mobile",
         "mobile testing"
     ],
-    "version": "0.1.2",
+    "version": "1.0.0-beta",
     "author": "tizen",
     "license": "Apache-2.0",
     "repository": {
@@ -28,8 +28,8 @@
         "lib": "lib"
     },
     "dependencies": {
-        "appium-sdb": "^0.1.2",
         "appium-base-driver": "^2.0.0",
+        "appium-sdb": "^1.0.0-beta",
         "appium-support": "^2.8.0",
         "asyncbox": "^2.0.4",
         "babel-runtime": "=5.8.24",
