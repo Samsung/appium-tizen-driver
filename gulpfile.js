@@ -8,6 +8,9 @@ const B = require('bluebird');
 const log = require('fancy-log');
 
 
+const exec = cp.exec;
+const spawn = cp.spawn;
+
 boilerplate({
   build: 'appium-tizen-driver',
   testTimeout: 40000
@@ -15,7 +18,7 @@ boilerplate({
 
 function runCommand (command) {
   return new B(function (resolve, reject) {
-    let run = cp.exec(command, function (error, stdout, stderr) {
+    let run = exec(command, function (error, stdout, stderr) {
       if (error) {
         reject(error);
       } else {
@@ -43,7 +46,7 @@ function cleanup () {
   ];
 
   return new B(function (resolve, reject) {
-    let rm = cp.spawn('rm', files);
+    let rm = spawn('rm', files);
 
     rm.on('error', reject);
     rm.on('close', resolve);
