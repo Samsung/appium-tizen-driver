@@ -9,7 +9,7 @@
         "mobile",
         "mobile testing"
     ],
-    "version": "1.1.1-beta",
+    "version": "1.1.1-beta2",
     "author": "tizen",
     "license": "Apache-2.0",
     "repository": {
@@ -31,8 +31,7 @@
         "index.js",
         "lib",
         "build/index.js",
-        "build/lib",
-        "ui-automator"
+        "build/lib"
     ],
     "dependencies": {
         "@babel/runtime": "^7.0.0",
@@ -50,10 +49,10 @@
     },
     "scripts": {
         "clean": "rm -rf node_modules && rm -f package-lock.json && npm install",
-        "prepare": "gulp prepublish && gulp build-gbs",
+        "prepare": "gulp prepublish",
         "test": "gulp once",
         "watch": "gulp watch",
-        "build": "gulp transpile && gulp build-gbs",
+        "build": "gulp transpile",
         "mocha": "mocha",
         "precommit-msg": "echo 'Pre-commit checks...' && exit 0",
         "precommit-test": "REPORTER=dot gulp once",
