@@ -3,11 +3,18 @@
 
 import yargs from 'yargs';
 import { asyncify } from 'asyncbox';
-import { startServer } from './lib/server';
-import TizenDriver from './lib/driver';
-import tizenHelpers from './lib/tizen-helpers';
-import tizenCommands from './lib/commands/index';
-import { commonCapConstraints } from './lib/desired-caps';
+import * as server from './lib/server';
+import * as driver from './lib/driver';
+import * as helpers from './lib/tizen-helpers';
+import * as commands from './lib/commands/index';
+import * as caps from './lib/desired-caps';
+
+
+const { startServer } = server;
+const { TizenDriver } = driver;
+const { helpers: tizenHelpers } = helpers;
+const { commands: tizenCommands } = commands;
+const { commonCapConstraints } = caps;
 
 const DEFAULT_HOST = "localhost";
 const DEFAULT_PORT = 4723;
@@ -15,7 +22,7 @@ const DEFAULT_PORT = 4723;
 async function main () {
   let port = yargs.argv.port || DEFAULT_PORT;
   let host = yargs.argv.host || DEFAULT_HOST;
-  return startServer(port, host);
+  return await startServer(port, host);
 }
 
 if (require.main === module) {
@@ -23,5 +30,4 @@ if (require.main === module) {
 }
 
 export default TizenDriver;
-export { tizenHelpers, tizenCommands, TizenDriver, startServer,
-         commonCapConstraints };
+export { tizenHelpers, tizenCommands, TizenDriver, startServer, commonCapConstraints };
