@@ -9,7 +9,7 @@
         "mobile",
         "mobile testing"
     ],
-    "version": "1.1.1-beta.2",
+    "version": "1.1.1-beta.3",
     "author": "tizen",
     "license": "Apache-2.0",
     "repository": {
@@ -31,7 +31,8 @@
         "index.js",
         "lib",
         "build/index.js",
-        "build/lib"
+        "build/lib",
+        "uiautomator"
     ],
     "dependencies": {
         "@babel/runtime": "^7.0.0",
