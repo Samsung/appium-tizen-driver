@@ -18,6 +18,7 @@ const fs = require('fs');
 
 boilerplate.use(gulp)({
   build: 'appium-tizen-driver',
-  testTimeout: 100000,
-  test: {files: ['${testDir}/**/*.js']}
+  testTimeout: 10000,
+  test: {files: ['${testDir}/**/*.js']},
+  testReporter: 'spec'
 });
