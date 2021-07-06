@@ -6,7 +6,6 @@ const TizenDriver = require('../lib/driver').TizenDriver;
 let driver;
 
 beforeEach(async function setUpTizenDriver () {
-  // TODO: check precondition: elm-demo app installed, aurum running, etc.
   const opts = {
     tizenBackend: 'aurum',
     appPackage: 'org.tizen.elm-demo-tizen-mobile'
@@ -18,7 +17,29 @@ beforeEach(async function setUpTizenDriver () {
     appPackage: 'org.tizen.elm-demo-tizen-mobile'
   };
 
-  return await driver.createSession(sessionCaps);
+  return driver.createSession(sessionCaps);
+});
+
+describe('Application management', function () {
+  beforeEach(async function () {
+    await driver.closeApp();
+  });
+
+  describe('isStartedApp', function () {
+    it('should return "false" when app is not running', async function () {
+      let result = await driver.isStartedApp();
+      console.log(result);
+      assert(typeof result === 'boolean');
+      assert(result === false);
+    });
+
+    it('should return "true" when app is running', async function () {
+      await driver.startApp();
+      let result = await driver.isStartedApp();
+      assert(typeof result === 'boolean');
+      assert(result === true);
+    });
+  });
 });
 
 describe('findElement', function () {
@@ -36,7 +57,7 @@ describe('findElement', function () {
       assert(result !== null);
       assert(typeof result === 'string');
       assert(utils.hasOnlyDigits(result));
-      return true;
+      return;
     });
 
     it ('should find an array of non-zero elements when no constraint is set', async function () {
@@ -44,7 +65,7 @@ describe('findElement', function () {
       assert(result !== null);
       assert(typeof result === 'string');
       assert(utils.hasOnlyDigits(result));
-      return true;
+      return;
     });
 
     it ('should find an element with a simple single-condition strategy', async function () {
@@ -64,7 +85,8 @@ describe('findElement', function () {
       assert(result !== null);
       assert(typeof result === 'string');
       assert(utils.hasOnlyDigits(result));
-      return true;
+      assert(existingId === result);
+      return;
     });
 
     it('should support "automationId" strategy', async function () {
@@ -72,7 +94,7 @@ describe('findElement', function () {
       assert(result !== null);
       assert(typeof result === 'string');
       assert(utils.hasOnlyDigits(result));
-      return true;
+      return;
     });
 
     it('should support "accessibility id" strategy', async function () {
@@ -82,7 +104,7 @@ describe('findElement', function () {
       assert(result !== null);
       assert(typeof result === 'string');
       assert(utils.hasOnlyDigits(result));
-      return true;
+      return;
     });
 
     it('should support "name" strategy', async function () {
@@ -90,7 +112,7 @@ describe('findElement', function () {
       assert(result !== null);
       assert(typeof result === 'string');
       assert(utils.hasOnlyDigits(result));
-      return true;
+      return;
     });
 
     it('should support "class name" strategy', async function () {
@@ -98,13 +120,14 @@ describe('findElement', function () {
       assert(result !== null);
       assert(typeof result === 'string');
       assert(utils.hasOnlyDigits(result));
-      return true;
+      return;
     });
 
     it('should throw NoSuchElementError when element is not found', async function () {
       await driver.findElement('-tizen aurum', {
         elementId: 'Non-existent elementId'
       });
+      return;
     });
   });
 
@@ -118,6 +141,7 @@ describe('findElement', function () {
                 {
                   name: 'InvalidSelectorError'
                 });
+      return;
     });
   });
 });
