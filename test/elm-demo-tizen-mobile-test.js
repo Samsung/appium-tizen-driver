@@ -1,23 +1,29 @@
+import { errors } from 'appium-base-driver/build/lib/protocol';
+import { assert } from 'chai';
 const utils = require('./utils');
 
-import { strict as assert } from 'assert';
 const TizenDriver = require('../lib/driver').TizenDriver;
 
-let driver;
-
-beforeEach(async function setUpTizenDriver () {
+async function getTizenDriver () {
   const opts = {
     tizenBackend: 'aurum',
     appPackage: 'org.tizen.elm-demo-tizen-mobile'
   };
-  driver = new TizenDriver(opts, true);
+
+  const driver = new TizenDriver(opts, true);
   const sessionCaps = {
     platformName: 'tizen',
     deviceName: 'TM1',
     appPackage: 'org.tizen.elm-demo-tizen-mobile'
   };
 
-  return driver.createSession(sessionCaps);
+  await driver.createSession(sessionCaps);
+  return driver;
+}
+
+let driver;
+beforeEach('initialize driver', async function () {
+  driver = await getTizenDriver();
 });
 
 describe('Application management', function () {
@@ -43,9 +49,7 @@ describe('Application management', function () {
 });
 
 describe('findElement', function () {
-
   describe('using "-tizen aurum" strategy', function () {
-
     it('should support nested selectors', async function () {
       let result = await driver.findElement('-tizen aurum', {
         children: [{
@@ -73,7 +77,7 @@ describe('findElement', function () {
       assert(result !== null);
       assert(typeof result === 'string');
       assert(utils.hasOnlyDigits(result));
-      return true;
+      return;
     });
   });
 
@@ -146,3 +150,63 @@ describe('findElement', function () {
   });
 });
 
+describe('getAttribute', async function () {
+  // Attributes below are present in org.tizen.elm-demo-tizen-mobile
+  // application available at https://github.sec.samsung.net/p-kalota/elm-demo-tizen-mobile/
+  // The list below is based on the corresponding test case for Python API:
+  // https://github.sec.samsung.net/tizen/aurum/blob/7386c192cdcbea8c831ab7abc0e48a52873f7fed/protocol/examples/python/mobileDemoTestTM1/mobileDemoTest.py#L78
+
+  // Using 'true' and null instead of true/false is required by
+  // the W3C and JSONWP specs
+  const buttonAttributeValueList = [
+    ['VISIBLE', true],
+    ['FOCUSABLE', true],
+    ['FOCUSED', null],
+    ['ENABLED', true],
+    ['CLICKABLE', true],
+    ['SCROLLABLE', null],
+    ['CHECKABLE', null],
+    ['CHECKED', null],
+    ['SELECTED', null],
+    ['SELECTABLE', true],
+    ['SHOWING', true],
+  ];
+
+  // Element IDs differ between different TizenDriver instances
+  let buttonId;
+  beforeEach('get buttonId', async function () {
+    buttonId = await driver.findElement('-tizen aurum', {textField: 'Button'});
+  });
+
+  it('should get proper values of "Button"\'s attributes', async function () {
+    for (let [attributeName, expectedValue] of buttonAttributeValueList) {
+      const foundValue = await driver.getAttribute(attributeName, buttonId);
+      if (foundValue === null) {
+        assert.isNull(foundValue);
+      } else {
+        assert.typeOf(foundValue, typeof expectedValue);
+      }
+      assert.strictEqual(expectedValue, foundValue);
+    }
+  });
+
+  it('should succeed in getting an attribute when its name is not upper-case-only', async function () {
+    const [pokemonCaseAttributeName, expectedValue] = ['vIsIbLe', true];
+    const foundValue = await driver.getAttribute(pokemonCaseAttributeName, buttonId);
+    if (foundValue === null) {
+      assert.isNull(foundValue);
+    } else {
+      assert.typeOf(foundValue, typeof expectedValue);
+    }
+    assert.strictEqual(expectedValue, foundValue);
+  });
+
+  it('should raise InvalidArgumentError when given attribute with unsupported name', async function () {
+    const unsupportedAttributeName = 'unsupported_attribute_name';
+    try {
+      await driver.getAttribute(unsupportedAttributeName, buttonId);
+    } catch (error) {
+      assert.instanceOf(error, errors.InvalidArgumentError);
+    }
+  });
+});
