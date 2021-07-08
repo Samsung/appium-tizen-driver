@@ -11,14 +11,14 @@ const fs = require('fs');
  */
 (function copyAurumProtoTask () {
   const buildDir = boilerplate.DEFAULTS.transpile ? boilerplate.DEFAULTS.transpileOut : '.';
-  const aurumProtoDestDir = `${__dirname}/${buildDir}/lib/aurum_backend`;
+  const aurumProtoDestDir = `${__dirname}/${buildDir}/lib/commands`;
   fs.mkdirSync(aurumProtoDestDir, {recursive: true});
-  fs.copyFileSync(__dirname + '/lib/aurum_backend/aurum.proto', `${aurumProtoDestDir}/aurum.proto`);
+  fs.copyFileSync(__dirname + '/lib/commands/aurum.proto', `${aurumProtoDestDir}/aurum.proto`);
 })();
 
 boilerplate.use(gulp)({
   build: 'appium-tizen-driver',
-  testTimeout: 10000,
+  testTimeout: 30000,
   test: {files: ['${testDir}/**/*.js']},
   testReporter: 'spec'
 });

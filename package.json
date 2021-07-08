@@ -19,9 +19,9 @@
     "bugs": {
         "url": "https://github.com/Samsung/appium-tizen-driver/issues"
     },
-    "engines": [
-        "node"
-    ],
+    "engines": {
+        "node": ">=14.17.0"
+    },
     "main": "./build/index.js",
     "bin": {},
     "directories": {
@@ -32,8 +32,7 @@
         "index.js",
         "lib",
         "build/index.js",
-        "build/lib",
-        "uiautomator"
+        "build/lib"
     ],
     "dependencies": {
         "@babel/runtime": "^7.0.0",
