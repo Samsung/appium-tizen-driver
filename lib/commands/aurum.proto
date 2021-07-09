@@ -1,15 +1,11 @@
 syntax = "proto3";
 package aurum;
 
-// This file was copied from https://github.sec.samsung.net/tizen/aurum
-// Go to the repo for the latest version of this file
-
 /**
   * @page protocol Protocol
   * Here is a page with some descriptions about protocol explained
   */
 service Bootstrap {
-   rpc sync(ReqEmpty) returns (RspEmpty) {}
    rpc killServer(ReqEmpty) returns (RspEmpty) {}
    rpc findElement(ReqFindElement) returns (RspFindElement) {}
    rpc getValue(ReqGetValue) returns (RspGetValue) {}
@@ -161,7 +157,11 @@ message ReqFindElement {
       int32 maxDepth = 17;
    }
 
-   repeated ReqFindElement children = 18;
+   oneof _packagename {
+      string packageName = 18;
+   }
+
+   repeated ReqFindElement children = 19;
 }
 message RspFindElement {
    RspStatus status = 1;
@@ -234,13 +234,7 @@ message ReqGetAttribute {
 }
 message RspGetAttribute {
    RspStatus status = 1;
-   ParamType type = 2;
-   oneof params {
-      string stringValue = 3;
-      int32 intValue = 4;
-      double doubleValue = 5;
-      bool boolValue = 6;
-   }
+   bool boolValue = 2;
 }
 
 // ------------------------------------ //
