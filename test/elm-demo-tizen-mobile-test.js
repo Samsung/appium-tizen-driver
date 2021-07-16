@@ -186,11 +186,121 @@ describe('Element properties and attributes', function () {
 
     it('should raise InvalidArgumentError when given attribute with unsupported name', async function () {
       const unsupportedAttributeName = 'unsupported_attribute_name';
-      try {
-        await driver.getAttribute(unsupportedAttributeName, buttonId);
-      } catch (error) {
-        assert.instanceOf(error, errors.InvalidArgumentError);
-      }
+      const result = driver.getAttribute(unsupportedAttributeName, buttonId);
+      assert.isRejected(result, errors.InvalidArgumentError);
+    });
+  });
+
+  describe('Element property getters', function () {
+    describe('Getting an Element object', function () {
+      /*
+      * Getting an Element, which is the first step of all property
+      * getters tested further should comply to the W3C WebDriver spec:
+      * https://w3c.github.io/webdriver/webdriver-spec.html#dfn-get-a-known-element
+      */
+      it('should get the proper element object', async function () {
+        const element = await driver.getElement(buttonId);
+        const elementId = element.getElementid();
+        assert.strictEqual(elementId, buttonId);
+      });
+
+      it('should raise NoSuchElement when the element does not exist', function () {
+        const promise = driver.getElement('non-existent-id');
+        assert.isRejected(promise, errors.NoSuchElement);
+      });
+    });
+
+    describe('getLocationInView', function () {
+      it('should get a valid position of an element', async function () {
+        /*
+         * It's hard to check in a unit test, if the coordinates are accurate,
+         * so we only test if they are valid numbers.
+         *
+         * Negative coords are valid for "location in view".
+         */
+
+        const locationInView = await driver.getLocationInView(buttonId);
+        assert.isNumber(locationInView.x);
+        assert.isFinite(locationInView.x);
+        assert.isNumber(locationInView.y);
+        assert.isFinite(locationInView.y);
+      });
+    });
+
+    describe('getText', function () {
+      it('should return proper text', async function () {
+        const text = await driver.getText(buttonId);
+        assert.isString(text);
+        assert.strictEqual(text, 'Button');
+      });
+    });
+
+    describe('elementEnabled', function () {
+      it('should return proper value', async function () {
+        const isEnabled = await driver.elementEnabled(buttonId);
+        assert.isBoolean(isEnabled);
+        // Button is not a form, so it should return false, according to the spec
+        assert.isFalse(isEnabled);
+      });
+
+      // TODO: when we have a method to go to other menus
+      // of elm-demo-tizen-mobile-test application
+      // add another test case to test if 'isEnabled'
+      // returns a proper value for a form, which should
+      // be true, when focused
+    });
+
+    describe('elementDisplayed', function () {
+      it('should return true for an element that is displayed', async function () {
+        // 'Accessibility' is the first element on the list - we assume it should be
+        // displayed, but in case you see this test failing, check if
+        // that's true for your device
+        const accessibilityId = await driver.findElement('-tizen aurum', {textField: 'Accessibility'});
+        const isDisplayed = await driver.elementDisplayed(accessibilityId);
+        assert.isBoolean(isDisplayed);
+        assert.isTrue(isDisplayed);
+      });
+
+      it('should return false for an element that is not displayed', async function () {
+        // 'VG' is the last element on the list - we assume it should not be
+        // displayed, but in case you see this test failing, check if
+        // that's true for your device
+        const vgId = await driver.findElement('-tizen aurum', {textField: 'VG'});
+        const isDisplayed = await driver.elementDisplayed(vgId);
+        assert.isBoolean(isDisplayed);
+        assert.isTrue(isDisplayed);
+      });
+    });
+
+    describe('elementSelected', function () {
+      it('should return false for an element that is not a checkbox, radio or option', async function () {
+        const isSelected = await driver.elementSelected(buttonId);
+        assert.isBoolean(isSelected);
+        assert.isFalse(isSelected);
+      });
+
+      // TODO: when we have a method to go to other menus
+      // of elm-demo-tizen-mobile-test application
+      // add another test case to test if 'isSelected'
+      // returns a proper value for elements for which,
+      // which it can be true
+    });
+
+    describe('getSize', function () {
+      it('should get valid width and height of an element', async function () {
+        /*
+         * It's hard to check in a unit test, if the width and height are proper,
+         * so we only test if they are valid numbers.
+         *
+         * Negative coords are valid for "location in view".
+         */
+
+        const size = await driver.getSize(buttonId);
+        assert.isNumber(size.width);
+        assert.isAtLeast(size.width, 0);
+        assert.isNumber(size.height);
+        assert.isAtLeast(size.height, 0);
+      });
     });
   });
 });
