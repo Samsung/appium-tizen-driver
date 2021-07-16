@@ -1,8 +1,12 @@
-import { errors } from 'appium-base-driver/build/lib/protocol';
-import { assert } from 'chai';
+import { errors } from 'appium-base-driver';
+import chai from 'chai';
+import chaiAsPromised from 'chai-as-promised';
 const utils = require('./utils');
 
 const TizenDriver = require('../lib/driver').TizenDriver;
+
+chai.use(chaiAsPromised);
+const assert = chai.assert;
 
 async function getTizenDriver () {
   const opts = {
@@ -34,16 +38,15 @@ describe('Application management', function () {
   describe('isStartedApp', function () {
     it('should return "false" when app is not running', async function () {
       let result = await driver.isStartedApp();
-      console.log(result);
-      assert(typeof result === 'boolean');
-      assert(result === false);
+      assert.isBoolean(result);
+      assert.isFalse(result);
     });
 
     it('should return "true" when app is running', async function () {
       await driver.startApp();
       let result = await driver.isStartedApp();
-      assert(typeof result === 'boolean');
-      assert(result === true);
+      assert.isBoolean(result);
+      assert.isTrue(result);
     });
   });
 });
@@ -58,26 +61,23 @@ describe('findElement', function () {
           isShowing: true
         }]
       });
-      assert(result !== null);
-      assert(typeof result === 'string');
-      assert(utils.hasOnlyDigits(result));
-      return;
+      assert.isNotNull(result);
+      assert.isString(result);
+      assert.isTrue(utils.hasOnlyDigits(result));
     });
 
     it ('should find an array of non-zero elements when no constraint is set', async function () {
       let result = await driver.findElement('-tizen aurum', {/* No constraints */});
-      assert(result !== null);
-      assert(typeof result === 'string');
-      assert(utils.hasOnlyDigits(result));
-      return;
+      assert.isNotNull(result);
+      assert.isString(result);
+      assert.isTrue(utils.hasOnlyDigits(result));
     });
 
     it ('should find an element with a simple single-condition strategy', async function () {
       let result = await driver.findElement('-tizen aurum', {isClickable: true});
-      assert(result !== null);
-      assert(typeof result === 'string');
-      assert(utils.hasOnlyDigits(result));
-      return;
+      assert.isNotNull(result);
+      assert.isString(result);
+      assert.isTrue(utils.hasOnlyDigits(result));
     });
   });
 
@@ -86,66 +86,58 @@ describe('findElement', function () {
     it('should support "id" strategy', async function () {
       const existingId = await driver.findElement('-tizen aurum', {});
       const result = await driver.findElement('id', existingId);
-      assert(result !== null);
-      assert(typeof result === 'string');
-      assert(utils.hasOnlyDigits(result));
-      assert(existingId === result);
-      return;
+      assert.isNotNull(result);
+      assert.isString(result);
+      assert.isTrue(utils.hasOnlyDigits(result), 'elementId should consist of digits only');
+      assert.strictEqual(existingId, result);
     });
 
     it('should support "automationId" strategy', async function () {
-      const result = await driver.findElement('automationId', 'TODO');
-      assert(result !== null);
-      assert(typeof result === 'string');
-      assert(utils.hasOnlyDigits(result));
-      return;
+      const existingAutomationId = 'TODO';
+      const result = await driver.findElement('automationId', existingAutomationId);
+      assert.isNotNull(result);
+      assert.isString(result);
+      assert.isTrue(utils.hasOnlyDigits(result), 'elementId should consist of digits only');
+      assert.strictEqual(existingAutomationId, result);
     });
 
     it('should support "accessibility id" strategy', async function () {
-      // TODO: finish
-      const existingId = await driver.findElement('-tizen aurum', {});
-      const result = await driver.findElement('accessibility id', 'TODO');
-      assert(result !== null);
-      assert(typeof result === 'string');
-      assert(utils.hasOnlyDigits(result));
-      return;
+      const existingAccessibilityId = 'TODO';
+      const result = await driver.findElement('accessibility id', existingAccessibilityId);
+      assert.isNotNull(result);
+      assert.isString(result);
+      assert.isTrue(utils.hasOnlyDigits(result), 'elementId should consist of digits only');
+      assert.strictEqual(existingAccessibilityId, result);
     });
 
     it('should support "name" strategy', async function () {
+      const existingName = 'TODO';
       const result = await driver.findElement('name', 'Button');
-      assert(result !== null);
-      assert(typeof result === 'string');
-      assert(utils.hasOnlyDigits(result));
-      return;
+      assert.isNotNull(result);
+      assert.isString(result);
+      assert.isTrue(utils.hasOnlyDigits(result), 'elementId should consist of digits only');
+      assert.strictEqual(existingName, result);
     });
 
     it('should support "class name" strategy', async function () {
-      const result = await driver.findElement('class name', 'TODO');
-      assert(result !== null);
-      assert(typeof result === 'string');
-      assert(utils.hasOnlyDigits(result));
-      return;
+      const existingClassName = 'TODO';
+      const result = await driver.findElement('class name', existingClassName);
+      assert.isNotNull(result);
+      assert.isString(result);
+      assert.isTrue(utils.hasOnlyDigits(result), 'elementId should consist of digits only');
+      assert.strictEqual(existingClassName, result);
     });
 
-    it('should throw NoSuchElementError when element is not found', async function () {
-      await driver.findElement('-tizen aurum', {
-        elementId: 'Non-existent elementId'
-      });
-      return;
+    it('should throw NoSuchElementError when element is not found', function () {
+      const result = driver.findElement('-tizen aurum', {elementId: 'Non-existent elementId'});
+      assert.isRejected(result, errors.NoSuchElementError);
     });
   });
 
   describe('using unsupported strategy', function () {
-
-    it('should throw InvalidSelectorError', async function () {
-      assert.rejects(
-                async function () {
-                  return await driver.findElement('Not supported strategy', 'value');
-                },
-                {
-                  name: 'InvalidSelectorError'
-                });
-      return;
+    it('should throw InvalidSelectorError', function () {
+      const result = driver.findElement('Not supported strategy', 'value');
+      assert.isRejected(result, errors.InvalidSelectorError);
     });
   });
 });
@@ -200,7 +192,5 @@ describe('Element properties and attributes', function () {
         assert.instanceOf(error, errors.InvalidArgumentError);
       }
     });
-  });
-
   });
 });

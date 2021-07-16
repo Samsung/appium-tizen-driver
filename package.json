@@ -66,10 +66,14 @@
         "precommit-test"
     ],
     "devDependencies": {
+        "@types/chai": "^4.2.21",
+        "@types/lodash": "^4.14.171",
+        "@types/node": "^16.0.1",
         "ajv": "^8.6.1",
         "appium-gulp-plugins": "^5.5.0",
         "babel-eslint": "^10.0.0",
         "chai": "^4.3.4",
+        "chai-as-promised": "^7.1.1",
         "eslint": "^7.30.0",
         "eslint-config-appium": "^4.7.0",
         "eslint-plugin-import": "^2.23.4",
