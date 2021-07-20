@@ -302,5 +302,54 @@ describe('Element properties and attributes', function () {
         assert.isAtLeast(size.height, 0);
       });
     });
+
+    describe('getProperty', function () {
+      /*
+       * This test case is skipped by default, because it takes an
+       * unreasonable amount of time to run.
+       * Set testTimeout to 600000 in gulpfile.js, if you want to
+       * run this test.
+       */
+      it.skip('should get all properties of an object', async function () {
+        const stringProperties = ['elementId', 'widget_type',
+          'widget_style', 'text', 'id', 'automationId', 'package',
+          'role'];
+
+        for (let propertyName of stringProperties) {
+          const result = await driver.getProperty(buttonId, propertyName);
+          assert.isNotNull(result, `Property: ${propertyName}`);
+          assert.isString(result, `Property: ${propertyName}`);
+        }
+        const boolProperties = ['isChecked', 'isCheckable',
+          'isClickable', 'isEnabled', 'isFocused', 'isFocusable',
+          'isScrollable', 'isSelected', 'isShowing', 'isActive',
+          'isVisible', 'isSelectable'];
+
+        for (let propertyName of boolProperties) {
+          const result = await driver.getProperty(buttonId, propertyName);
+          assert.isNotNull(result, `Property: ${propertyName}`);
+          assert.isBoolean(result, `Property: ${propertyName}`);
+        }
+
+        const objectProperties = ['geometry'];
+        for (let propertyName of objectProperties) {
+          const result = await driver.getProperty(buttonId, propertyName);
+          assert.isNotNull(result, `Property: ${propertyName}`);
+          assert.isObject(result, `Property: ${propertyName}`);
+        }
+
+        const arrayProperties = ['child'];
+        for (let propertyName of arrayProperties) {
+          const result = await driver.getProperty(buttonId, propertyName);
+          assert.isNotNull(result, `Property: ${propertyName}`);
+          assert.isArray(result, `Property: ${propertyName}`);
+        }
+      });
+
+      it('should return a null when asked for a non-existent property', async function () {
+        const result = await driver.getProperty(buttonId, 'non-existent-property');
+        assert.isNull(result);
+      });
+    });
   });
 });
