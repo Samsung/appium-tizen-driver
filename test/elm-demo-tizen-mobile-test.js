@@ -30,6 +30,10 @@ beforeEach('initialize driver', async function () {
   driver = await getTizenDriver();
 });
 
+afterEach('Delete driver\'s session', async function () {
+  await driver.deleteSession();
+});
+
 describe('Application management', function () {
   beforeEach(async function () {
     await driver.closeApp();
