@@ -214,6 +214,24 @@ describe('Element properties and attributes', function () {
       });
     });
 
+    describe('getLocation', function () {
+      it('should get a valid position of an element', async function () {
+        /*
+         * It's hard to check in a unit test, if the coordinates are accurate,
+         * so we only test if they are valid numbers.
+         *
+         * Only non-negative coords are valid for "location".
+         */
+        const location = await driver.getLocation(buttonId);
+        assert.isNumber(location.x);
+        assert.isFinite(location.x);
+        assert.isAtLeast(location.x, 0);
+        assert.isNumber(location.y);
+        assert.isFinite(location.y);
+        assert.isAtLeast(location.y, 0);
+      });
+    });
+
     describe('getLocationInView', function () {
       it('should get a valid position of an element', async function () {
         /*

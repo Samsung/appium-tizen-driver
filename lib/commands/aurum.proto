@@ -51,28 +51,29 @@ message Element {
    repeated Element child = 2;
 
    Rect geometry = 3;
+   Rect window_relative_geometry = 4;
 
-   string widget_type = 4;
-   string widget_style = 5;
+   string widget_type = 5;
+   string widget_style = 6;
 
-   string text = 6;
-   string id = 7;
-   string automationId = 8;
-   string package = 9;
-   string role = 10;
+   string text = 7;
+   string id = 8;
+   string automationId = 9;
+   string package = 10;
+   string role = 11;
 
-   bool isChecked = 11;
-   bool isCheckable = 12;
-   bool isClickable = 13;
-   bool isEnabled = 14;
-   bool isFocused = 15;
-   bool isFocusable = 16;
-   bool isScrollable = 17;
-   bool isSelected = 18;
-   bool isShowing = 19;
-   bool isActive = 20;
-   bool isVisible = 21;
-   bool isSelectable = 22;
+   bool isChecked = 12;
+   bool isCheckable = 13;
+   bool isClickable = 14;
+   bool isEnabled = 15;
+   bool isFocused = 16;
+   bool isFocusable = 17;
+   bool isScrollable = 18;
+   bool isSelected = 19;
+   bool isShowing = 20;
+   bool isActive = 21;
+   bool isVisible = 22;
+   bool isSelectable = 23;
 }
 
 message Point {
@@ -85,6 +86,11 @@ message Rect {
    int32 y = 2;
    int32 width = 3;
    int32 height = 4;
+}
+
+message LaunchData {
+   string key = 1;
+   string value = 2;
 }
 
 // ------------------------------------ //
@@ -200,8 +206,14 @@ message RspSetValue {
 }
 
 message ReqGetSize{
-   string elementId = 1;
+   enum CoordType {
+   SCREEN = 0;
+   WINDOW = 1;
+   }
+   CoordType type = 1;
+   string elementId = 2;
 }
+
 message RspGetSize{
    RspStatus status = 1;
    Rect size = 2;
@@ -316,6 +328,7 @@ message RspGetAppInfo {
 
 message ReqLaunchApp{
    string packageName = 1;
+   repeated LaunchData data = 2;
 }
 message RspLaunchApp{
    RspStatus status = 1;
