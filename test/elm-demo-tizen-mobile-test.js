@@ -374,4 +374,279 @@ describe('Element properties and attributes', function () {
       });
     });
   });
+
+  describe('Element property modifiers', function () {
+    let singleLineEntryId;
+    beforeEach('go to "Singleline Entry" menu and get singleLinentryId', async function () {
+      const entryMenuId = await driver.findElement('-tizen aurum', {textField: 'Entry'});
+      await driver.click(entryMenuId);
+      const singleLineEntryMenuId = await driver.findElement('-tizen aurum', {textField: 'Singleline Entry'});
+      await driver.click(singleLineEntryMenuId);
+      singleLineEntryId = await driver.findElement('-tizen aurum', {widgetType: 'Elm_Entry'});
+    });
+
+    /*
+     * We only test "setValue", because setValueImmediate and replaceValue
+     * do the same and all three methods share the implementation.
+     */
+    describe('setValue', function () {
+      it('should set the desired text value', async function () {
+        const initialText = await driver.getText(singleLineEntryId);
+        assert.strictEqual(initialText, '');
+
+        const testTextValue = 'test text value';
+        await driver.setValue(testTextValue, singleLineEntryId);
+
+        const finalText = await driver.getText(singleLineEntryId);
+        assert.strictEqual(finalText, testTextValue);
+      });
+
+      it('should throw NoSuchElementError when called with elementId of a non-existent element', function () {
+        const NONEXISTENT_ID = '3999999999';
+        const result = driver.setValue('test text value', NONEXISTENT_ID);
+        assert.isRejected(result, errors.NoSuchElementError);
+      });
+    });
+
+    describe('clear', function () {
+      it('should leave a text field empty', async function () {
+        const initialText = await driver.getText(singleLineEntryId);
+        assert.strictEqual(initialText, '');
+
+        await driver.clear(singleLineEntryId);
+        const clearingEmptyResult = await driver.getText(singleLineEntryId);
+        assert.strictEqual(clearingEmptyResult, '');
+
+        const testTextValue = 'test text value';
+        await driver.setValue(testTextValue, singleLineEntryId);
+
+        const clearingTextResult = await driver.getText(singleLineEntryId);
+        assert.strictEqual(clearingTextResult, testTextValue);
+      });
+
+      it('should throw NoSuchElementError when called with elementId of a non-existent element', function () {
+        const NONEXISTENT_ID = '3999999999';
+        const result = driver.clear(NONEXISTENT_ID);
+        assert.isRejected(result, errors.NoSuchElementError);
+      });
+    });
+  });
+});
+
+describe('Touching and clicking', function () {
+  // Element IDs differ between different TizenDriver instances
+  let buttonId;
+  beforeEach('get buttonId', async function () {
+    buttonId = await driver.findElement('-tizen aurum', {textField: 'Button'});
+  });
+
+  describe('A typical touchDown->touchMove->touchMove->...->touchUp sequence', function () {
+    it('should change the positions of elements with reference to the screen, when screen is scrolled down', async function () {
+      const initialPosition = await driver.getLocationInView(buttonId);
+      const TOUCH_X = 160;
+      const TOUCH_DOWN_Y = 640;
+      const Y_DISPLACEMENT = 600;
+      await driver.touchDown(TOUCH_X, TOUCH_DOWN_Y);
+      for (let newY = TOUCH_DOWN_Y; newY >= TOUCH_DOWN_Y - Y_DISPLACEMENT; newY -= 10) {
+        await driver.touchMove(TOUCH_X, newY);
+      }
+      await driver.touchUp(TOUCH_X, 0);
+      const finalPosition = await driver.getLocationInView(buttonId);
+
+      assert.strictEqual(initialPosition.x, finalPosition.x);
+      /*
+       * The difference between the first and last Y position
+       * passed to touchMove (i.e. Y_DISPLACEMENT) is always
+       * 20 pixels greater than the actual change in element's
+       * position.
+       * It may be, that there is some finger movement length
+       * threshold below which the finger movement does not
+       * trigger UI change.
+       * This is why, we add this threshold to the expected
+       * new position of UI element.
+       */
+      const Y_UI_MOVEMENT_THRESHOLD = 20;
+      assert.strictEqual(initialPosition.y - Y_DISPLACEMENT + Y_UI_MOVEMENT_THRESHOLD, finalPosition.y);
+    });
+  });
+
+  function assertInView (screenResolution, elementXY) {
+    assert.isAtLeast(elementXY.x, 0);
+    assert.isAtLeast(elementXY.y, 0);
+    assert.isBelow(elementXY.x, screenResolution.x);
+    assert.isBelow(elementXY.y, screenResolution.y);
+  }
+
+  function assertNotInView (screenResolution, elementXY) {
+    assert.isTrue(elementXY.x < 0 || elementXY.x >= screenResolution.x ||
+                  elementXY.y < 0 || elementXY.y >= screenResolution.y);
+  }
+
+  describe('scrollElementIntoView', function () {
+    it('should do nothing for an element that is visible', async function () {
+      const initialPosition = await driver.getLocationInView(buttonId);
+      await driver.scrollElementIntoView(buttonId);
+      const finalPosition = await driver.getLocationInView(buttonId);
+
+      assert.strictEqual(initialPosition.x, finalPosition.x);
+      assert.strictEqual(initialPosition.y, finalPosition.y);
+    });
+
+    it('should move an element from the bottom to the visible part of the app window', async function () {
+      const spinnerId = await driver.findElement('-tizen aurum', { textField: 'Spinner' });
+      const initialPosition = await driver.getLocationInView(spinnerId);
+      assertNotInView(driver.screenResolution, initialPosition);
+      await driver.scrollElementIntoView(spinnerId);
+      const finalPosition = await driver.getLocationInView(spinnerId);
+      assertInView(driver.screenResolution, finalPosition);
+    });
+
+    it('should move an element from the top to the visible part of the app window', async function () {
+      /*
+       * 2 flicks to move "Button" out of view
+       */
+      const flickX = Math.round(driver.screenResolution.x / 2);
+      await driver.doFlick([flickX, driver.screenResolution.y - 1],
+                           [flickX, 1], 2000);
+      await driver.doFlick([flickX, driver.screenResolution.y - 1],
+                           [flickX, 1], 2000);
+      const initialPosition = await driver.getLocationInView(buttonId);
+      assertNotInView(driver.screenResolution, initialPosition);
+
+      await driver.scrollElementIntoView(buttonId);
+      const finalPosition = await driver.getLocationInView(buttonId);
+      assertInView(driver.screenResolution, finalPosition);
+    });
+  });
+
+  describe('click', function () {
+    it('should change the menu when a navigational element is clicked', async function () {
+      const phoneInMainMenu = driver.findElement('-tizen aurum', {textField: 'Phone'});
+      assert.isRejected(phoneInMainMenu, errors.NoSuchElementError);
+
+      await driver.click(buttonId);
+      const phoneInButtonMenuPromise = driver.findElement('-tizen aurum', {textField: 'Phone'});
+      assert.isFulfilled(phoneInButtonMenuPromise);
+
+      const phoneInButtonMenu = await phoneInButtonMenuPromise;
+      assert.isNotNull(phoneInButtonMenu);
+      assert.isString(phoneInButtonMenu);
+      assert.isTrue(utils.hasOnlyDigits(phoneInButtonMenu));
+    });
+
+    it('should scroll element into view when it is not in current view', async function () {
+      const spinnerId = await driver.findElement('-tizen aurum', { textField: 'Spinner' });
+      const initialPosition = await driver.getLocationInView(spinnerId);
+      assertNotInView(driver.screenResolution, initialPosition);
+      await driver.click(spinnerId);
+
+      const januarySearchResultPromise = driver.findElement('-tizen aurum', {textField: 'January'});
+      assert.isFulfilled(januarySearchResultPromise);
+
+      const januarySearchResult = await januarySearchResultPromise;
+      assert.isNotNull(januarySearchResult);
+      assert.isString(januarySearchResult);
+      assert.isTrue(utils.hasOnlyDigits(januarySearchResult));
+    });
+
+    it('should throw a NoSuchElement error when non-existent elementId is passed', function () {
+      const NONEXISTENT_ID = '3999999999';
+      const result = driver.click(NONEXISTENT_ID);
+      assert.isRejected(result, errors.NoSuchElementError);
+    });
+  });
+
+  describe('touchLongClick', function () {
+    /*
+     * Checking if a long click triggers this tooltip menu is an easy
+     * way to check if the click is "long".
+     */
+    it('should trigger a tooltip menu when a text entry is touched', async function () {
+      const entryId = await driver.findElement('-tizen aurum', { textField: 'Entry' });
+      await driver.click(entryId);
+
+      const singleLineEntryId = await driver.findElement('-tizen aurum', { textField: 'Singleline Entry' });
+      await driver.click(singleLineEntryId);
+
+      const pasteTooltipButtonBeforeLongClick = driver.findElement('-tizen aurum', { textField: 'Paste'});
+      assert.isRejected(pasteTooltipButtonBeforeLongClick, errors.NoSuchElementError);
+
+      const entryFieldId = await driver.findElement('-tizen aurum', { widgetType: 'Elm_Entry' });
+      await driver.touchLongClick(entryFieldId);
+
+      const pasteTooltipButtonAfterLongClickPromise = driver.findElement('-tizen aurum', { textField: 'Paste'});
+      assert.isFulfilled(pasteTooltipButtonAfterLongClickPromise);
+
+      const pasteTooltipButtonAfterLongClick = await pasteTooltipButtonAfterLongClickPromise;
+      assert.isNotNull(pasteTooltipButtonAfterLongClick);
+      assert.isString(pasteTooltipButtonAfterLongClick);
+      assert.isTrue(utils.hasOnlyDigits(pasteTooltipButtonAfterLongClick));
+    });
+
+    it('should scroll element into view when it is not in current view', async function () {
+      const spinnerId = await driver.findElement('-tizen aurum', { textField: 'Spinner' });
+      const initialPosition = await driver.getLocationInView(spinnerId);
+      assertNotInView(driver.screenResolution, initialPosition);
+      await driver.touchLongClick(spinnerId);
+
+      const januarySearchResultPromise = driver.findElement('-tizen aurum', {textField: 'January'});
+      assert.isFulfilled(januarySearchResultPromise);
+
+      const januarySearchResult = await januarySearchResultPromise;
+      assert.isNotNull(januarySearchResult);
+      assert.isString(januarySearchResult);
+      assert.isTrue(utils.hasOnlyDigits(januarySearchResult));
+    });
+
+    it('should throw a NoSuchElement error when non-existent elementId is passed', function () {
+      const NONEXISTENT_ID = '3999999999';
+      const result = driver.touchLongClick(NONEXISTENT_ID);
+      assert.isRejected(result, errors.NoSuchElementError);
+    });
+  });
+
+  describe('flick', function () {
+    it('should change positions of elements on the screen', async function () {
+      const initialPosition = await driver.getLocationInView(buttonId);
+      await driver.flick(buttonId, undefined, undefined, 0, -300, 20);
+      const finalPosition = await driver.getLocationInView(buttonId);
+
+      assert.isTrue(initialPosition.x !== finalPosition.x || initialPosition.y !== finalPosition.y);
+    });
+
+    it('should raise InvalidCoordinatesError, when start or stop point are outside of the screen', async function () {
+      const spinnerId = await driver.findElement('-tizen aurum', {textField: 'Spinner'});
+      const startOutsidePromise = driver.flick(spinnerId, undefined, undefined, 2000, 100, 20);
+      assert.isRejected(startOutsidePromise, errors.InvalidCoordinatesError);
+
+      const stopOutsidePromise = driver.flick(buttonId, undefined, undefined, -900, 100, 20);
+      assert.isRejected(stopOutsidePromise, errors.InvalidCoordinatesError);
+    });
+
+    it('should raise NoSuchElementError when a non-existent or invalid elementId is passed', function () {
+      const nonExistentElementIdPromise = driver.flick('3999999999', undefined, undefined, 20, 100, 20);
+      assert.isRejected(nonExistentElementIdPromise, errors.NoSuchElementError);
+
+      const invalidElementIdPromise = driver.flick('invalid elementId', undefined, undefined, 20, 100, 20);
+      assert.isRejected(invalidElementIdPromise, errors.NoSuchElementError);
+    });
+
+    it('should raise InvalidArgumentError when invalid "speed" is passed', function () {
+      const unfulfilledPromises = [];
+      unfulfilledPromises.push(driver.flick(buttonId, undefined, undefined, 20, 10));
+      unfulfilledPromises.push(driver.flick(buttonId, undefined, undefined, 20, 10, -123));
+      unfulfilledPromises.push(driver.flick(buttonId, undefined, undefined, 20, 10, 'not a number'));
+      unfulfilledPromises.push(driver.flick(buttonId, undefined, undefined, 20, 10, NaN));
+      unfulfilledPromises.push(driver.flick(buttonId, undefined, undefined, 20, 10, 0));
+
+      for (let promise of unfulfilledPromises) {
+        assert.isRejected(promise, errors.InvalidArgumentError);
+      }
+    });
+
+    it('should raise InvalidArgumentError when (speedX, speedY) and (offsetX, offsetY) vectors are misaligned and the "speed" argument is not provided', function () {
+      const misalignedVectorsPromise = driver.flick(buttonId, -199, 112333, 20, 10);
+      assert.isRejected(misalignedVectorsPromise, errors.InvalidArgumentError);
+    });
+  });
 });
