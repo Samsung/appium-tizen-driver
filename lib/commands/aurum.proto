@@ -57,7 +57,6 @@ message Element {
    string widget_style = 6;
 
    string text = 7;
-   string id = 8;
    string automationId = 9;
    string package = 10;
    string role = 11;

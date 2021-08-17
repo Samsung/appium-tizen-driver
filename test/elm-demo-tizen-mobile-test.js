@@ -57,7 +57,7 @@ describe('Application management', function () {
   });
 });
 
-describe.only('findElement', function () {
+describe('findElement', function () {
   let buttonObject;
   beforeEach('get buttonId', async function () {
     const buttonId = await driver.findElementId('-tizen aurum', {textField: 'Button'});
@@ -75,21 +75,18 @@ describe.only('findElement', function () {
       })).ELEMENT;
       assert.isNotNull(result);
       assert.isString(result);
-      assert.isTrue(utils.hasOnlyDigits(result));
     });
 
     it ('should find an array of non-zero elements when no constraint is set', async function () {
       let result = (await driver.findElement('-tizen aurum', {/* No constraints */})).ELEMENT;
       assert.isNotNull(result);
       assert.isString(result);
-      assert.isTrue(utils.hasOnlyDigits(result));
     });
 
     it ('should find an element with a simple single-condition strategy', async function () {
       let result = (await driver.findElement('-tizen aurum', {isClickable: true})).ELEMENT;
       assert.isNotNull(result);
       assert.isString(result);
-      assert.isTrue(utils.hasOnlyDigits(result));
     });
   });
 
@@ -99,7 +96,7 @@ describe.only('findElement', function () {
      * no element from elm-demo-tizen-mobile app has "automationId"
      * value set.
      */
-    it.skip('should support "accessibility id" strategy', async function () {
+    it('should support "accessibility id" strategy', async function () {
       /*
        * As long, as findElement is broken (see
        * https://github.sec.samsung.net/tizen/aurum/issues/10)
@@ -109,7 +106,6 @@ describe.only('findElement', function () {
       const result = (await driver.findElement('accessibility id', existingAccessibilityId)).ELEMENT;
       assert.isNotNull(result);
       assert.isString(result);
-      assert.isTrue(utils.hasOnlyDigits(result), 'elementId should consist of digits only');
       assert.strictEqual(result, buttonObject.elementid);
     });
 
@@ -118,7 +114,6 @@ describe.only('findElement', function () {
       const result = (await driver.findElement('name', existingName)).ELEMENT;
       assert.isNotNull(result);
       assert.isString(result);
-      assert.isTrue(utils.hasOnlyDigits(result), 'elementId should consist of digits only');
       assert.strictEqual(result, buttonObject.elementid);
     });
 
@@ -128,7 +123,6 @@ describe.only('findElement', function () {
       const result = (await driver.findElement('class name', existingClassName)).ELEMENT;
       assert.isNotNull(result);
       assert.isString(result);
-      assert.isTrue(utils.hasOnlyDigits(result), 'elementId should consist of digits only');
       assert.strictEqual(result, elmBoxObjectId);
     });
 
@@ -332,9 +326,9 @@ describe('Element properties and attributes', function () {
        * Set testTimeout to 600000 in gulpfile.js, if you want to
        * run this test.
        */
-      it.skip('should get all properties of an object', async function () {
+      it('should get all properties of an object', async function () {
         const stringProperties = ['elementId', 'widget_type',
-          'widget_style', 'text', 'id', 'automationId', 'package',
+          'widget_style', 'text', 'automationId', 'package',
           'role'];
 
         for (let propertyName of stringProperties) {
@@ -378,11 +372,11 @@ describe('Element properties and attributes', function () {
   describe('Element property modifiers', function () {
     let singleLineEntryId;
     beforeEach('go to "Singleline Entry" menu and get singleLinentryId', async function () {
-      const entryMenuId = await driver.findElement('-tizen aurum', {textField: 'Entry'});
+      const entryMenuId = (await driver.findElement('-tizen aurum', {textField: 'Entry'})).ELEMENT;
       await driver.click(entryMenuId);
-      const singleLineEntryMenuId = await driver.findElement('-tizen aurum', {textField: 'Singleline Entry'});
+      const singleLineEntryMenuId = (await driver.findElement('-tizen aurum', {textField: 'Singleline Entry'})).ELEMENT;
       await driver.click(singleLineEntryMenuId);
-      singleLineEntryId = await driver.findElement('-tizen aurum', {widgetType: 'Elm_Entry'});
+      singleLineEntryId = (await driver.findElement('-tizen aurum', {widgetType: 'Elm_Entry'})).ELEMENT;
     });
 
     /*
@@ -437,7 +431,7 @@ describe('Touching and clicking', function () {
   // Element IDs differ between different TizenDriver instances
   let buttonId;
   beforeEach('get buttonId', async function () {
-    buttonId = await driver.findElement('-tizen aurum', {textField: 'Button'});
+    buttonId = (await driver.findElement('-tizen aurum', {textField: 'Button'})).ELEMENT;
   });
 
   describe('A typical touchDown->touchMove->touchMove->...->touchUp sequence', function () {
@@ -493,7 +487,7 @@ describe('Touching and clicking', function () {
     });
 
     it('should move an element from the bottom to the visible part of the app window', async function () {
-      const spinnerId = await driver.findElement('-tizen aurum', { textField: 'Spinner' });
+      const spinnerId = (await driver.findElement('-tizen aurum', { textField: 'Spinner' })).ELEMENT;
       const initialPosition = await driver.getLocationInView(spinnerId);
       assertNotInView(driver.screenResolution, initialPosition);
       await driver.scrollElementIntoView(spinnerId);
@@ -528,14 +522,13 @@ describe('Touching and clicking', function () {
       const phoneInButtonMenuPromise = driver.findElement('-tizen aurum', {textField: 'Phone'});
       assert.isFulfilled(phoneInButtonMenuPromise);
 
-      const phoneInButtonMenu = await phoneInButtonMenuPromise;
+      const phoneInButtonMenu = (await phoneInButtonMenuPromise).ELEMENT;
       assert.isNotNull(phoneInButtonMenu);
       assert.isString(phoneInButtonMenu);
-      assert.isTrue(utils.hasOnlyDigits(phoneInButtonMenu));
     });
 
     it('should scroll element into view when it is not in current view', async function () {
-      const spinnerId = await driver.findElement('-tizen aurum', { textField: 'Spinner' });
+      const spinnerId = (await driver.findElement('-tizen aurum', { textField: 'Spinner' })).ELEMENT;
       const initialPosition = await driver.getLocationInView(spinnerId);
       assertNotInView(driver.screenResolution, initialPosition);
       await driver.click(spinnerId);
@@ -543,10 +536,9 @@ describe('Touching and clicking', function () {
       const januarySearchResultPromise = driver.findElement('-tizen aurum', {textField: 'January'});
       assert.isFulfilled(januarySearchResultPromise);
 
-      const januarySearchResult = await januarySearchResultPromise;
+      const januarySearchResult = (await januarySearchResultPromise).ELEMENT;
       assert.isNotNull(januarySearchResult);
       assert.isString(januarySearchResult);
-      assert.isTrue(utils.hasOnlyDigits(januarySearchResult));
     });
 
     it('should throw a NoSuchElement error when non-existent elementId is passed', function () {
@@ -562,40 +554,42 @@ describe('Touching and clicking', function () {
      * way to check if the click is "long".
      */
     it('should trigger a tooltip menu when a text entry is touched', async function () {
-      const entryId = await driver.findElement('-tizen aurum', { textField: 'Entry' });
+      const entryId = (await driver.findElement('-tizen aurum', { textField: 'Entry' })).ELEMENT;
       await driver.click(entryId);
 
-      const singleLineEntryId = await driver.findElement('-tizen aurum', { textField: 'Singleline Entry' });
+      const singleLineEntryId = (await driver.findElement('-tizen aurum', { textField: 'Singleline Entry' })).ELEMENT;
       await driver.click(singleLineEntryId);
 
-      const pasteTooltipButtonBeforeLongClick = driver.findElement('-tizen aurum', { textField: 'Paste'});
+      const pasteTooltipButtonBeforeLongClick = driver.findElement('-tizen aurum', { textField: 'Select'});
       assert.isRejected(pasteTooltipButtonBeforeLongClick, errors.NoSuchElementError);
 
-      const entryFieldId = await driver.findElement('-tizen aurum', { widgetType: 'Elm_Entry' });
+      const entryFieldId = (await driver.findElement('-tizen aurum', { widgetType: 'Elm_Entry' })).ELEMENT;
+      /*
+       * The tooltip only appears after a long touch of the field
+       * if either:
+       * a) there is some input in that field
+       * b) there is something in the clipboard.
+       * Thus we input the test string.
+       */
+      await driver.setValue('test string', entryFieldId);
       await driver.touchLongClick(entryFieldId);
 
-      const pasteTooltipButtonAfterLongClickPromise = driver.findElement('-tizen aurum', { textField: 'Paste'});
+      const pasteTooltipButtonAfterLongClickPromise = driver.findElement('-tizen aurum', { textField: 'Select'});
       assert.isFulfilled(pasteTooltipButtonAfterLongClickPromise);
 
-      const pasteTooltipButtonAfterLongClick = await pasteTooltipButtonAfterLongClickPromise;
+      const pasteTooltipButtonAfterLongClick = (await pasteTooltipButtonAfterLongClickPromise).ELEMENT;
       assert.isNotNull(pasteTooltipButtonAfterLongClick);
       assert.isString(pasteTooltipButtonAfterLongClick);
-      assert.isTrue(utils.hasOnlyDigits(pasteTooltipButtonAfterLongClick));
     });
 
     it('should scroll element into view when it is not in current view', async function () {
-      const spinnerId = await driver.findElement('-tizen aurum', { textField: 'Spinner' });
+      const spinnerId = (await driver.findElement('-tizen aurum', { textField: 'Spinner' })).ELEMENT;
       const initialPosition = await driver.getLocationInView(spinnerId);
       assertNotInView(driver.screenResolution, initialPosition);
       await driver.touchLongClick(spinnerId);
 
-      const januarySearchResultPromise = driver.findElement('-tizen aurum', {textField: 'January'});
-      assert.isFulfilled(januarySearchResultPromise);
-
-      const januarySearchResult = await januarySearchResultPromise;
-      assert.isNotNull(januarySearchResult);
-      assert.isString(januarySearchResult);
-      assert.isTrue(utils.hasOnlyDigits(januarySearchResult));
+      const finalPosition = await driver.getLocationInView(spinnerId);
+      assertInView(driver.screenResolution, finalPosition);
     });
 
     it('should throw a NoSuchElement error when non-existent elementId is passed', function () {
@@ -615,7 +609,7 @@ describe('Touching and clicking', function () {
     });
 
     it('should raise InvalidCoordinatesError, when start or stop point are outside of the screen', async function () {
-      const spinnerId = await driver.findElement('-tizen aurum', {textField: 'Spinner'});
+      const spinnerId = (await driver.findElement('-tizen aurum', {textField: 'Spinner'})).ELEMENT;
       const startOutsidePromise = driver.flick(spinnerId, undefined, undefined, 2000, 100, 20);
       assert.isRejected(startOutsidePromise, errors.InvalidCoordinatesError);
 
@@ -647,6 +641,65 @@ describe('Touching and clicking', function () {
     it('should raise InvalidArgumentError when (speedX, speedY) and (offsetX, offsetY) vectors are misaligned and the "speed" argument is not provided', function () {
       const misalignedVectorsPromise = driver.flick(buttonId, -199, 112333, 20, 10);
       assert.isRejected(misalignedVectorsPromise, errors.InvalidArgumentError);
+    });
+  });
+
+  describe('touchPerform', function () {
+    it('should perform a series of tasks', async function () {
+      const touchTasks = [
+        {
+          action: 'press',
+          options: {
+            x: Math.round(driver.screenResolution.x / 2),
+            y: driver.screenResolution.y - 1
+          }
+        },
+        {
+          action: 'moveTo',
+          options: {
+            x: Math.round(driver.screenResolution.x / 2),
+            y: 1
+          }
+        },
+        {
+          action: 'release',
+          options: {
+            x: Math.round(driver.screenResolution.x / 2),
+            y: 1
+          }
+        },
+        {
+          action: 'tap',
+          options: {
+            element: buttonId
+          }
+        },
+        {
+          action: 'wait',
+          options: {
+            ms: 15_000
+          }
+        },
+      ];
+      await driver.performTouch(touchTasks);
+
+      // Check, if we're in the desired menu
+      const phoneButtonIdPromise = driver.findElement('-tizen aurum', {textField: 'Phone'});
+      return assert.isFulfilled(phoneButtonIdPromise);
+    });
+  });
+
+  describe('back', function () {
+    it('should go back to the previous menu when "back" is issued', async function () {
+      await driver.click(buttonId);
+
+      // Assert, that we're in the "button menu"
+      const calendarPromiseInButtonMenu = driver.findElement('-tizen aurum', {textField: 'Calendar'});
+      assert.isRejected(calendarPromiseInButtonMenu, errors.NoSuchElementError);
+
+      await driver.back();
+      const calendarPromiseInMainMenu = driver.findElement('-tizen aurum', {textField: 'Calendar'});
+      assert.isFulfilled(calendarPromiseInMainMenu);
     });
   });
 });
