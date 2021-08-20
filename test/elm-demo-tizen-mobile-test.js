@@ -462,6 +462,35 @@ describe('Touching and clicking', function () {
       const Y_UI_MOVEMENT_THRESHOLD = 20;
       assert.strictEqual(initialPosition.y - Y_DISPLACEMENT + Y_UI_MOVEMENT_THRESHOLD, finalPosition.y);
     });
+
+    it('should properly handle touch{Move, Up} commands when x or y is 0', async function () {
+      const MID_SCREEN = Math.round(driver.screenResolution.x / 2);
+      /*
+       * VG is the last element on the list in the main menu.
+       * It must not visible in the beginning of the test case.
+       */
+      const vgId = (await driver.findElement('-tizen aurum', {textField: 'VG'})).ELEMENT;
+      const vgInitialPosition = await driver.getLocationInView(vgId);
+      assertNotInView(driver.screenResolution, vgInitialPosition);
+
+      /*
+       * Very fast touchDown->touchMove->touchUp sequence should scroll
+       * the list to the end.
+       */
+      await driver.touchDown(MID_SCREEN, driver.screenResolution.y - 1);
+      /*
+       * The most important thing - will these work with (x, y) == (0, 0)?
+       */
+      await driver.touchMove(0, 0);
+      await driver.touchUp(0, 0);
+
+      /*
+       * If touch* work with (0, 0), then the sequence should scroll the
+       * menu to the bottom and we should be able to see the VG element.
+       */
+      const vgFinalPosition = await driver.getLocationInView(vgId);
+      assertInView(driver.screenResolution, vgFinalPosition);
+    });
   });
 
   function assertInView (screenResolution, elementXY) {
@@ -686,6 +715,45 @@ describe('Touching and clicking', function () {
       // Check, if we're in the desired menu
       const phoneButtonIdPromise = driver.findElement('-tizen aurum', {textField: 'Phone'});
       return assert.isFulfilled(phoneButtonIdPromise);
+    });
+
+    it('should scroll the screen down when (x, y) coordinates for "release" are not provided', async function () {
+      /*
+       * VG is the last element on the list in the main menu. It should
+       * be outside of the view in the beginning of the test.
+       */
+      const vgId = (await driver.findElement('-tizen aurum', {textField: 'VG'})).ELEMENT;
+      const vgInitialPosition = await driver.getLocationInView(vgId);
+      assertNotInView(driver.screenResolution, vgInitialPosition);
+
+      const touchTasks = [
+        {
+          action: 'press',
+          options: {
+            x: Math.round(driver.screenResolution.x / 2),
+            y: driver.screenResolution.y - 1
+          }
+        },
+        {
+          action: 'moveTo',
+          options: {
+            x: Math.round(driver.screenResolution.x / 2),
+            y: 1
+          }
+        },
+        {
+          action: 'release',
+          options: {}
+        }
+      ];
+      await driver.performTouch(touchTasks);
+
+      /*
+       * If the scroll is performed successfully, we should be able
+       * to see the VG element.
+       */
+      const vgFinalPosition = await driver.getLocationInView(vgId);
+      assertInView(driver.screenResolution, vgFinalPosition);
     });
   });
 
