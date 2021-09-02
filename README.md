@@ -85,6 +85,8 @@ The gulp config used for this project can be found here: https://github.com/appi
 
 ### gulp test
 
+To run unit tests you need `org.tizen.elm-demo-tizen-mobile` application installed on the device under test. The app: [armv7l device](https://github.sec.samsung.net/p-wasowski2/appium-aurum-driver/blob/master/test/org.tizen.elm-demo-tizen-mobile-0.2-1.armv7l.rpm), [x86 emulator](https://github.sec.samsung.net/p-wasowski2/appium-aurum-driver/blob/master/test/org.tizen.elm-demo-tizen-mobile-0.2-1.i686.rpm).
+
 Call `gulp unit-test` to run unit tests from `test/` directory.
 
 The tests are implemented with https://mochajs.org/ framework and use asserts from https://www.chaijs.com.
