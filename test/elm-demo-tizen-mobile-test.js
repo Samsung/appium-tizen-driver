@@ -26,7 +26,8 @@ const assert = chai.assert;
 async function getTizenDriver () {
   const opts = {
     tizenBackend: 'aurum',
-    appPackage: 'org.tizen.elm-demo-tizen-mobile'
+    appPackage: 'org.tizen.elm-demo-tizen-mobile',
+    screenResolution: {x: 1920, y: 1080} // uncomment for TV devices
   };
 
   const driver = new TizenDriver(opts, true);
