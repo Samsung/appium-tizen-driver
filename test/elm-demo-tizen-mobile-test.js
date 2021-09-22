@@ -182,13 +182,13 @@ describe('Element properties and attributes', function () {
       ['CHECKED', null],
       ['SELECTED', null],
       ['SELECTABLE', true],
-      ['SHOWING', true],
+      ['SHOWING', null],
     ];
 
-    it('should get proper values of "Button"\'s attributes', async function () {
+    it.only('should get proper values of "Button"\'s attributes', async function () {
       for (let [attributeName, expectedValue] of buttonAttributeValueList) {
         const foundValue = await driver.getAttribute(attributeName, buttonId);
-        assert.strictEqual(expectedValue, foundValue);
+        assert.strictEqual(expectedValue, foundValue, `attributeName: ${attributeName}`);
       }
     });
 
