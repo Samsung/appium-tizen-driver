@@ -1,0 +1,463 @@
+From 95641946a14ec502ed0f74755194fc2da098d209 Mon Sep 17 00:00:00 2001
+From: Pawel Wasowski <p.wasowski2@samsung.com>
+Date: Thu, 29 Jul 2021 12:25:07 +0200
+Subject: [PATCH 1/4] Add Aurum support
+
+---
+ lib/appium.js | 18 +++++++++++++++++-
+ package.json  |  1 +
+ 2 files changed, 18 insertions(+), 1 deletion(-)
+
+diff --git a/lib/appium.js b/lib/appium.js
+index b5af6e57..7001fbc7 100644
+--- a/lib/appium.js
++++ b/lib/appium.js
+@@ -32,6 +32,7 @@ const AUTOMATION_NAMES = {
+   YOUIENGINE: 'YouiEngine',
+   ESPRESSO: 'Espresso',
+   TIZEN: 'Tizen',
++  AURUM: 'Aurum',
+   FAKE: 'Fake',
+   INSTRUMENTS: 'Instruments',
+   WINDOWS: 'Windows',
+@@ -88,6 +89,10 @@ const DRIVER_MAP = {
+     driverClassName: 'TizenDriver',
+     driverPackage: 'appium-tizen-driver',
+   },
++  [AUTOMATION_NAMES.AURUM.toLowerCase()]: {
++    driverClassName: 'TizenDriver',
++    driverPackage: 'appium-aurum-driver',
++  },
+   [AUTOMATION_NAMES.FLUTTER.toLowerCase()]: {
+     driverClassName: 'FlutterDriver',
+     driverPackage: 'appium-flutter-driver'
+@@ -156,7 +161,18 @@ const PLATFORMS_MAP = {
+   [PLATFORMS.APPLE_TVOS]: () => AUTOMATION_NAMES.XCUITEST,
+   [PLATFORMS.WINDOWS]: () => AUTOMATION_NAMES.WINDOWS,
+   [PLATFORMS.MAC]: () => AUTOMATION_NAMES.MAC,
+-  [PLATFORMS.TIZEN]: () => AUTOMATION_NAMES.TIZEN,
++  [PLATFORMS.TIZEN]: (caps) => {
++    const platformVersion = semver.valid(semver.coerce(caps.platformVersion));
++    let automationName = AUTOMATION_NAMES.TIZEN;
++    if (platformVersion && semver.satisfies(platformVersion, '>=6.5')) {
++      log.info('Tizen version >= 6.5 - using Aurum automation');
++      automationName = AUTOMATION_NAMES.AURUM;
++    }
++
++    log.warn(`DeprecationWarning: 'automationName' capability was not provided. ` +
++      `Setting automationName=${automationName}`);
++    return automationName;
++  },
+   [PLATFORMS.LINUX]: () => AUTOMATION_NAMES.GECKO,
+   [PLATFORMS.ROKU]: () => AUTOMATION_NAMES.ROKU,
+   [PLATFORMS.WEBOS]: () => AUTOMATION_NAMES.WEBOS
+diff --git a/package.json b/package.json
+index e50d31a8..73b192d6 100644
+--- a/package.json
++++ b/package.json
+@@ -42,6 +42,7 @@
+   "dependencies": {
+     "@babel/runtime": "^7.6.0",
+     "appium-android-driver": "^4.20.0",
++    "appium-aurum-driver": "git+ssh://git@github.sec.samsung.net:p-wasowski2/appium-aurum-driver.git#master",
+     "appium-base-driver": "^7.0.0",
+     "appium-espresso-driver": "^1.0.0",
+     "appium-fake-driver": "^1.x",
+-- 
+2.17.1
+
+
+From 6d86319cd4c97fd7d1f6436ee60f7ebb8f8bc357 Mon Sep 17 00:00:00 2001
+From: Pawel Wasowski <p.wasowski2@samsung.com>
+Date: Fri, 30 Jul 2021 17:40:50 +0200
+Subject: [PATCH 2/4] Update README.md. Change the branch of
+ appium-aurum-driver dependency
+
+---
+ README.md    | 37 +++++++++++++++++++++++++++++++++++++
+ package.json |  2 +-
+ 2 files changed, 38 insertions(+), 1 deletion(-)
+
+diff --git a/README.md b/README.md
+index 6870ebd9..2b9ca1cf 100644
+--- a/README.md
++++ b/README.md
+@@ -1,3 +1,40 @@
++# For Tizen developers
++
++## Install dependencies
++
++You can install all the dependencies by running the following command in the main directory:
++
++```bash
++npm install
++```
++
++### appium-aurum-driver dependency
++
++To support Tizen devices with aurum framework, this repo depends on [appium-aurum-driver](https://github.sec.samsung.net/p-wasowski2/appium-aurum-driver). The dependency is not a typical NPM package, but a particular branch of the private repo:
++
++```json
++    "appium-aurum-driver": "git+ssh://git@github.sec.samsung.net:p-wasowski2/appium-aurum-driver.git#mergeAll2",
++```
++
++Currently, the branch implemneting all features of `appium-aurum-driver` is `mergeAll2`.
++**Remember to change the branch to master, when all changes are merged!**
++
++### Running Appium for Tizen devices with Aurum framework
++
++When all dependencies are installed build the project by running:
++
++```bash
++gulp transpile
++```
++
++Then you can run the Appium server with:
++
++```bash
++node .
++```
++
++That's all!
++
+ ## Appium
+ 
+ [![NPM version](https://badge.fury.io/js/appium.svg)](https://npmjs.org/package/appium)
+diff --git a/package.json b/package.json
+index 73b192d6..c185b723 100644
+--- a/package.json
++++ b/package.json
+@@ -42,7 +42,7 @@
+   "dependencies": {
+     "@babel/runtime": "^7.6.0",
+     "appium-android-driver": "^4.20.0",
+-    "appium-aurum-driver": "git+ssh://git@github.sec.samsung.net:p-wasowski2/appium-aurum-driver.git#master",
++    "appium-aurum-driver": "git+ssh://git@github.sec.samsung.net:p-wasowski2/appium-aurum-driver.git#mergeAll2",
+     "appium-base-driver": "^7.0.0",
+     "appium-espresso-driver": "^1.0.0",
+     "appium-fake-driver": "^1.x",
+-- 
+2.17.1
+
+
+From 8b871d63e8f55112eb76b1d5f96795e237c79b46 Mon Sep 17 00:00:00 2001
+From: Pawel Wasowski <p.wasowski2@samsung.com>
+Date: Fri, 30 Jul 2021 17:43:51 +0200
+Subject: [PATCH 3/4] Update README.md
+
+---
+ README.md | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/README.md b/README.md
+index 2b9ca1cf..b78ca67d 100644
+--- a/README.md
++++ b/README.md
+@@ -35,6 +35,11 @@ node .
+ 
+ That's all!
+ 
++### Writing JS tests for Tizen apps
++
++Use [webdriver.io](https://github.sec.samsung.net/p-wasowski2/webdriver.io) to write tests for Tizen apps.
++See [this example](https://github.sec.samsung.net/p-wasowski2/webdriverio_tizen_sample) to see how.
++
+ ## Appium
+ 
+ [![NPM version](https://badge.fury.io/js/appium.svg)](https://npmjs.org/package/appium)
+-- 
+2.17.1
+
+
+From c59fefb87ed15f18d2ed878067a2787dba9d644a Mon Sep 17 00:00:00 2001
+From: Pawel Wasowski <p.wasowski2@samsung.com>
+Date: Tue, 17 Aug 2021 13:08:58 +0200
+Subject: [PATCH 4/4] Use master branch of appium-aurum-driver
+
+---
+ README.md    | 7 ++-----
+ package.json | 2 +-
+ 2 files changed, 3 insertions(+), 6 deletions(-)
+
+diff --git a/README.md b/README.md
+index b78ca67d..c559fadc 100644
+--- a/README.md
++++ b/README.md
+@@ -10,15 +10,12 @@ npm install
+ 
+ ### appium-aurum-driver dependency
+ 
+-To support Tizen devices with aurum framework, this repo depends on [appium-aurum-driver](https://github.sec.samsung.net/p-wasowski2/appium-aurum-driver). The dependency is not a typical NPM package, but a particular branch of the private repo:
++To support Tizen devices with aurum framework, this repo depends on [appium-aurum-driver](https://github.sec.samsung.net/p-wasowski2/appium-aurum-driver). The dependency is not a typical NPM package, but a private repo:
+ 
+ ```json
+-    "appium-aurum-driver": "git+ssh://git@github.sec.samsung.net:p-wasowski2/appium-aurum-driver.git#mergeAll2",
++    "appium-aurum-driver": "git+ssh://git@github.sec.samsung.net:p-wasowski2/appium-aurum-driver.git",
+ ```
+ 
+-Currently, the branch implemneting all features of `appium-aurum-driver` is `mergeAll2`.
+-**Remember to change the branch to master, when all changes are merged!**
+-
+ ### Running Appium for Tizen devices with Aurum framework
+ 
+ When all dependencies are installed build the project by running:
+diff --git a/package.json b/package.json
+index c185b723..702a69a1 100644
+--- a/package.json
++++ b/package.json
+@@ -42,7 +42,7 @@
+   "dependencies": {
+     "@babel/runtime": "^7.6.0",
+     "appium-android-driver": "^4.20.0",
+-    "appium-aurum-driver": "git+ssh://git@github.sec.samsung.net:p-wasowski2/appium-aurum-driver.git#mergeAll2",
++    "appium-aurum-driver": "git+ssh://git@github.sec.samsung.net:p-wasowski2/appium-aurum-driver.git",
+     "appium-base-driver": "^7.0.0",
+     "appium-espresso-driver": "^1.0.0",
+     "appium-fake-driver": "^1.x",
+-- 
+2.17.1
+
+From 95641946a14ec502ed0f74755194fc2da098d209 Mon Sep 17 00:00:00 2001
+From: Pawel Wasowski <p.wasowski2@samsung.com>
+Date: Thu, 29 Jul 2021 12:25:07 +0200
+Subject: [PATCH 1/5] Add Aurum support
+
+---
+ lib/appium.js | 18 +++++++++++++++++-
+ package.json  |  1 +
+ 2 files changed, 18 insertions(+), 1 deletion(-)
+
+diff --git a/lib/appium.js b/lib/appium.js
+index b5af6e57..7001fbc7 100644
+--- a/lib/appium.js
++++ b/lib/appium.js
+@@ -32,6 +32,7 @@ const AUTOMATION_NAMES = {
+   YOUIENGINE: 'YouiEngine',
+   ESPRESSO: 'Espresso',
+   TIZEN: 'Tizen',
++  AURUM: 'Aurum',
+   FAKE: 'Fake',
+   INSTRUMENTS: 'Instruments',
+   WINDOWS: 'Windows',
+@@ -88,6 +89,10 @@ const DRIVER_MAP = {
+     driverClassName: 'TizenDriver',
+     driverPackage: 'appium-tizen-driver',
+   },
++  [AUTOMATION_NAMES.AURUM.toLowerCase()]: {
++    driverClassName: 'TizenDriver',
++    driverPackage: 'appium-aurum-driver',
++  },
+   [AUTOMATION_NAMES.FLUTTER.toLowerCase()]: {
+     driverClassName: 'FlutterDriver',
+     driverPackage: 'appium-flutter-driver'
+@@ -156,7 +161,18 @@ const PLATFORMS_MAP = {
+   [PLATFORMS.APPLE_TVOS]: () => AUTOMATION_NAMES.XCUITEST,
+   [PLATFORMS.WINDOWS]: () => AUTOMATION_NAMES.WINDOWS,
+   [PLATFORMS.MAC]: () => AUTOMATION_NAMES.MAC,
+-  [PLATFORMS.TIZEN]: () => AUTOMATION_NAMES.TIZEN,
++  [PLATFORMS.TIZEN]: (caps) => {
++    const platformVersion = semver.valid(semver.coerce(caps.platformVersion));
++    let automationName = AUTOMATION_NAMES.TIZEN;
++    if (platformVersion && semver.satisfies(platformVersion, '>=6.5')) {
++      log.info('Tizen version >= 6.5 - using Aurum automation');
++      automationName = AUTOMATION_NAMES.AURUM;
++    }
++
++    log.warn(`DeprecationWarning: 'automationName' capability was not provided. ` +
++      `Setting automationName=${automationName}`);
++    return automationName;
++  },
+   [PLATFORMS.LINUX]: () => AUTOMATION_NAMES.GECKO,
+   [PLATFORMS.ROKU]: () => AUTOMATION_NAMES.ROKU,
+   [PLATFORMS.WEBOS]: () => AUTOMATION_NAMES.WEBOS
+diff --git a/package.json b/package.json
+index e50d31a8..73b192d6 100644
+--- a/package.json
++++ b/package.json
+@@ -42,6 +42,7 @@
+   "dependencies": {
+     "@babel/runtime": "^7.6.0",
+     "appium-android-driver": "^4.20.0",
++    "appium-aurum-driver": "git+ssh://git@github.sec.samsung.net:p-wasowski2/appium-aurum-driver.git#master",
+     "appium-base-driver": "^7.0.0",
+     "appium-espresso-driver": "^1.0.0",
+     "appium-fake-driver": "^1.x",
+-- 
+2.17.1
+
+
+From 6d86319cd4c97fd7d1f6436ee60f7ebb8f8bc357 Mon Sep 17 00:00:00 2001
+From: Pawel Wasowski <p.wasowski2@samsung.com>
+Date: Fri, 30 Jul 2021 17:40:50 +0200
+Subject: [PATCH 2/5] Update README.md. Change the branch of
+ appium-aurum-driver dependency
+
+---
+ README.md    | 37 +++++++++++++++++++++++++++++++++++++
+ package.json |  2 +-
+ 2 files changed, 38 insertions(+), 1 deletion(-)
+
+diff --git a/README.md b/README.md
+index 6870ebd9..2b9ca1cf 100644
+--- a/README.md
++++ b/README.md
+@@ -1,3 +1,40 @@
++# For Tizen developers
++
++## Install dependencies
++
++You can install all the dependencies by running the following command in the main directory:
++
++```bash
++npm install
++```
++
++### appium-aurum-driver dependency
++
++To support Tizen devices with aurum framework, this repo depends on [appium-aurum-driver](https://github.sec.samsung.net/p-wasowski2/appium-aurum-driver). The dependency is not a typical NPM package, but a particular branch of the private repo:
++
++```json
++    "appium-aurum-driver": "git+ssh://git@github.sec.samsung.net:p-wasowski2/appium-aurum-driver.git#mergeAll2",
++```
++
++Currently, the branch implemneting all features of `appium-aurum-driver` is `mergeAll2`.
++**Remember to change the branch to master, when all changes are merged!**
++
++### Running Appium for Tizen devices with Aurum framework
++
++When all dependencies are installed build the project by running:
++
++```bash
++gulp transpile
++```
++
++Then you can run the Appium server with:
++
++```bash
++node .
++```
++
++That's all!
++
+ ## Appium
+ 
+ [![NPM version](https://badge.fury.io/js/appium.svg)](https://npmjs.org/package/appium)
+diff --git a/package.json b/package.json
+index 73b192d6..c185b723 100644
+--- a/package.json
++++ b/package.json
+@@ -42,7 +42,7 @@
+   "dependencies": {
+     "@babel/runtime": "^7.6.0",
+     "appium-android-driver": "^4.20.0",
+-    "appium-aurum-driver": "git+ssh://git@github.sec.samsung.net:p-wasowski2/appium-aurum-driver.git#master",
++    "appium-aurum-driver": "git+ssh://git@github.sec.samsung.net:p-wasowski2/appium-aurum-driver.git#mergeAll2",
+     "appium-base-driver": "^7.0.0",
+     "appium-espresso-driver": "^1.0.0",
+     "appium-fake-driver": "^1.x",
+-- 
+2.17.1
+
+
+From 8b871d63e8f55112eb76b1d5f96795e237c79b46 Mon Sep 17 00:00:00 2001
+From: Pawel Wasowski <p.wasowski2@samsung.com>
+Date: Fri, 30 Jul 2021 17:43:51 +0200
+Subject: [PATCH 3/5] Update README.md
+
+---
+ README.md | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/README.md b/README.md
+index 2b9ca1cf..b78ca67d 100644
+--- a/README.md
++++ b/README.md
+@@ -35,6 +35,11 @@ node .
+ 
+ That's all!
+ 
++### Writing JS tests for Tizen apps
++
++Use [webdriver.io](https://github.sec.samsung.net/p-wasowski2/webdriver.io) to write tests for Tizen apps.
++See [this example](https://github.sec.samsung.net/p-wasowski2/webdriverio_tizen_sample) to see how.
++
+ ## Appium
+ 
+ [![NPM version](https://badge.fury.io/js/appium.svg)](https://npmjs.org/package/appium)
+-- 
+2.17.1
+
+
+From c59fefb87ed15f18d2ed878067a2787dba9d644a Mon Sep 17 00:00:00 2001
+From: Pawel Wasowski <p.wasowski2@samsung.com>
+Date: Tue, 17 Aug 2021 13:08:58 +0200
+Subject: [PATCH 4/5] Use master branch of appium-aurum-driver
+
+---
+ README.md    | 7 ++-----
+ package.json | 2 +-
+ 2 files changed, 3 insertions(+), 6 deletions(-)
+
+diff --git a/README.md b/README.md
+index b78ca67d..c559fadc 100644
+--- a/README.md
++++ b/README.md
+@@ -10,15 +10,12 @@ npm install
+ 
+ ### appium-aurum-driver dependency
+ 
+-To support Tizen devices with aurum framework, this repo depends on [appium-aurum-driver](https://github.sec.samsung.net/p-wasowski2/appium-aurum-driver). The dependency is not a typical NPM package, but a particular branch of the private repo:
++To support Tizen devices with aurum framework, this repo depends on [appium-aurum-driver](https://github.sec.samsung.net/p-wasowski2/appium-aurum-driver). The dependency is not a typical NPM package, but a private repo:
+ 
+ ```json
+-    "appium-aurum-driver": "git+ssh://git@github.sec.samsung.net:p-wasowski2/appium-aurum-driver.git#mergeAll2",
++    "appium-aurum-driver": "git+ssh://git@github.sec.samsung.net:p-wasowski2/appium-aurum-driver.git",
+ ```
+ 
+-Currently, the branch implemneting all features of `appium-aurum-driver` is `mergeAll2`.
+-**Remember to change the branch to master, when all changes are merged!**
+-
+ ### Running Appium for Tizen devices with Aurum framework
+ 
+ When all dependencies are installed build the project by running:
+diff --git a/package.json b/package.json
+index c185b723..702a69a1 100644
+--- a/package.json
++++ b/package.json
+@@ -42,7 +42,7 @@
+   "dependencies": {
+     "@babel/runtime": "^7.6.0",
+     "appium-android-driver": "^4.20.0",
+-    "appium-aurum-driver": "git+ssh://git@github.sec.samsung.net:p-wasowski2/appium-aurum-driver.git#mergeAll2",
++    "appium-aurum-driver": "git+ssh://git@github.sec.samsung.net:p-wasowski2/appium-aurum-driver.git",
+     "appium-base-driver": "^7.0.0",
+     "appium-espresso-driver": "^1.0.0",
+     "appium-fake-driver": "^1.x",
+-- 
+2.17.1
+
+
+From 1c50c1fb1a92f46ddb9ab1d5a09840ebd124ffb5 Mon Sep 17 00:00:00 2001
+From: Pawel Wasowski <p.wasowski2@samsung.com>
+Date: Thu, 23 Sep 2021 16:14:44 +0200
+Subject: [PATCH 5/5] Remove non-public appium-aurum-driver dependency
+
+---
+ package.json | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/package.json b/package.json
+index 702a69a1..e50d31a8 100644
+--- a/package.json
++++ b/package.json
+@@ -42,7 +42,6 @@
+   "dependencies": {
+     "@babel/runtime": "^7.6.0",
+     "appium-android-driver": "^4.20.0",
+-    "appium-aurum-driver": "git+ssh://git@github.sec.samsung.net:p-wasowski2/appium-aurum-driver.git",
+     "appium-base-driver": "^7.0.0",
+     "appium-espresso-driver": "^1.0.0",
+     "appium-fake-driver": "^1.x",
+-- 
+2.17.1
+
