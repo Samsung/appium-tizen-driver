@@ -1,3 +1,6 @@
 {
-  "extends": "appium"
+  "extends": "appium",
+  "rules": {
+    "prefer-await-to-callbacks": 0
+  }
 }

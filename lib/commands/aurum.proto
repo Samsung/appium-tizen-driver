@@ -1,0 +1,418 @@
+syntax = "proto3";
+package aurum;
+
+/**
+  * @page protocol Protocol
+  * Here is a page with some descriptions about protocol explained
+  */
+service Bootstrap {
+   rpc killServer(ReqEmpty) returns (RspEmpty) {}
+   rpc findElement(ReqFindElement) returns (RspFindElement) {}
+   rpc getValue(ReqGetValue) returns (RspGetValue) {}
+   rpc setValue(ReqSetValue) returns (RspSetValue) {}
+   rpc getSize(ReqGetSize) returns (RspGetSize) {}
+   rpc clear(ReqClear) returns (RspClear) {}
+   rpc getAttribute(ReqGetAttribute) returns (RspGetAttribute) {}
+   rpc click(ReqClick) returns (RspClick) {}
+   rpc longClick(ReqClick) returns (RspClick) {}
+   rpc flick(ReqFlick) returns (RspFlick) {}
+   rpc touchDown(ReqTouchDown) returns (RspTouchDown) {}
+   rpc touchMove(ReqTouchMove) returns (RspTouchMove) {}
+   rpc touchUp(ReqTouchUp) returns (RspTouchUp) {}
+   rpc installApp(stream ReqInstallApp) returns (RspInstallApp) {}
+   rpc removeApp(ReqRemoveApp) returns (RspRemoveApp) {}
+   rpc getAppInfo(ReqGetAppInfo) returns (RspGetAppInfo) {}
+   rpc launchApp(ReqLaunchApp) returns (RspLaunchApp) {}
+   rpc closeApp(ReqCloseApp) returns (RspCloseApp) {}
+   rpc getDeviceTime(ReqGetDeviceTime) returns (RspGetDeviceTime) {}
+   rpc getLocation(ReqGetLocation) returns (RspGetLocation) {}
+   rpc sendKey(ReqKey) returns (RspKey) {}
+   rpc takeScreenshot(ReqTakeScreenshot) returns (stream RspTakeScreenshot) {}
+   rpc dumpObjectTree(ReqDumpObjectTree) returns (RspDumpObjectTree) {}
+}
+
+// ------------------------------------ //
+
+enum RspStatus {
+   OK = 0;
+   NA = 1;
+   ERROR = 2;
+}
+
+enum ParamType {
+   STRING = 0;
+   INT = 1;
+   DOUBLE = 2;
+   BOOL = 3;
+}
+
+message Element {
+   string elementId = 1;
+   repeated Element child = 2;
+
+   Rect geometry = 3;
+   Rect window_relative_geometry = 4;
+
+   string widget_type = 5;
+   string widget_style = 6;
+
+   string text = 7;
+   string automationId = 9;
+   string package = 10;
+   string role = 11;
+
+   bool isChecked = 12;
+   bool isCheckable = 13;
+   bool isClickable = 14;
+   bool isEnabled = 15;
+   bool isFocused = 16;
+   bool isFocusable = 17;
+   bool isScrollable = 18;
+   bool isSelected = 19;
+   bool isShowing = 20;
+   bool isActive = 21;
+   bool isVisible = 22;
+   bool isSelectable = 23;
+}
+
+message Point {
+   int32 x = 1;
+   int32 y = 2;
+}
+
+message Rect {
+   int32 x = 1;
+   int32 y = 2;
+   int32 width = 3;
+   int32 height = 4;
+}
+
+message LaunchData {
+   string key = 1;
+   string value = 2;
+}
+
+// ------------------------------------ //
+
+message ReqFindElement {
+   oneof _elementid {
+      string elementId = 1;
+   }
+
+   oneof _automationid {
+      string automationId = 2;
+   }
+
+   oneof _textfield {
+      string textField = 3;
+   }
+
+   oneof _widgettype {
+      string widgetType = 4;
+   }
+
+   oneof _widgetstyle {
+      string widgetStyle = 5;
+   }
+
+   oneof _ischecked {
+      bool isChecked = 6;
+   }
+
+   oneof _ischeckable {
+      bool isCheckable= 7;
+   }
+
+   oneof _isclickable {
+      bool isClickable = 8;
+   }
+
+   oneof _isenabled {
+      bool isEnabled = 9;
+   }
+
+   oneof _isfocused {
+      bool isFocused = 10;
+   }
+
+   oneof _isfocusable {
+      bool isFocusable = 11;
+   }
+
+   oneof _isscrollable {
+      bool isScrollable = 12;
+   }
+
+   oneof _isselected {
+      bool isSelected = 13;
+   }
+
+   oneof _isshowing {
+      bool isShowing = 14;
+   }
+
+   oneof _isactive {
+      bool isActive = 15;
+   }
+   oneof _mindepth {
+      int32 minDepth = 16;
+   }
+
+   oneof _maxdepth {
+      int32 maxDepth = 17;
+   }
+
+   oneof _packagename {
+      string packageName = 18;
+   }
+
+   repeated ReqFindElement children = 19;
+}
+message RspFindElement {
+   RspStatus status = 1;
+   repeated Element elements = 2;
+}
+
+// ------------------------------------ //
+
+message ReqGetValue {
+   string elementId = 1;
+   // TODO : text, widgetstyle, widgettype, automationid
+}
+message RspGetValue {
+   RspStatus status = 1;
+   ParamType type  = 2;
+   oneof params {
+      string stringValue = 3;
+      int32 intValue = 4;
+      double doubleValue = 5;
+      bool boolValue = 6;
+   }
+}
+
+message ReqSetValue {
+   string elementId = 1;
+   ParamType type  = 2;
+   oneof params {
+      string stringValue = 3;
+      int32 intValue = 4;
+      double doubleValue = 5;
+      bool boolValue = 6;
+   }
+}
+message RspSetValue {
+   RspStatus status = 1;
+}
+
+message ReqGetSize{
+   enum CoordType {
+   SCREEN = 0;
+   WINDOW = 1;
+   }
+   CoordType type = 1;
+   string elementId = 2;
+}
+
+message RspGetSize{
+   RspStatus status = 1;
+   Rect size = 2;
+}
+
+message ReqClear{
+   string elementId = 1;
+}
+message RspClear{
+   RspStatus status = 1;
+}
+
+message ReqGetAttribute {
+   enum RequestType {
+      VISIBLE     = 0;
+      FOCUSABLE   = 1;
+      FOCUSED     = 2;
+      ENABLED     = 3;
+      CLICKABLE   = 4;
+      SCROLLABLE  = 5;
+      CHECKABLE   = 6;
+      CHECKED     = 7;
+      SELECTED    = 8;
+      SELECTABLE  = 9;
+      SHOWING     = 10;
+      ACTIVE      = 11;
+   }
+   string elementId = 1;
+   RequestType attribute = 2;
+}
+message RspGetAttribute {
+   RspStatus status = 1;
+   bool boolValue = 2;
+}
+
+// ------------------------------------ //
+
+message ReqClick{
+   enum RequestType {
+      ELEMENTID = 0;
+      COORD = 1;
+      ATSPI = 2;
+   }
+   RequestType type  = 1;
+   oneof params {
+      string elementId = 2;
+      Point coordination = 3;
+   }
+}
+message RspClick{
+   RspStatus status = 1;
+}
+
+message ReqFlick{
+   Point startPoint = 1;
+   Point endPoint = 2;
+   int32 durationMs = 3;
+}
+message RspFlick{
+   RspStatus status = 1;
+}
+
+message ReqTouchDown{
+   Point coordination = 1;
+}
+message RspTouchDown{
+   RspStatus status = 1;
+   int32 seqId = 2;
+}
+
+message ReqTouchMove{
+   int32 seqId = 1;
+   Point coordination = 2;
+}
+message RspTouchMove{
+   RspStatus status = 1;
+}
+
+message ReqTouchUp{
+   int32 seqId = 1;
+   Point coordination = 2;
+}
+message RspTouchUp{
+   RspStatus status = 1;
+}
+
+// ------------------------------------ //
+
+message ReqInstallApp{
+   bytes package = 1;
+}
+message RspInstallApp{
+   RspStatus status = 1;
+}
+
+message ReqRemoveApp{
+   string packageName = 1;
+}
+message RspRemoveApp{
+   RspStatus status = 1;
+}
+
+message ReqGetAppInfo{
+   string packageName = 1;
+}
+message RspGetAppInfo {
+   RspStatus status = 1;
+   bool isInstalled = 2;
+   bool isRunning = 3;
+   bool isFocused = 4;
+}
+
+message ReqLaunchApp{
+   string packageName = 1;
+   repeated LaunchData data = 2;
+}
+message RspLaunchApp{
+   RspStatus status = 1;
+}
+
+message ReqCloseApp{
+   string packageName = 1;
+}
+message RspCloseApp{
+   RspStatus status = 1;
+}
+
+// ------------------------------------ //
+
+message ReqGetDeviceTime{
+   enum TimeType {
+      WALLCLOCK= 0;
+      SYSTEM = 1;
+   }
+   TimeType type = 1;
+}
+message RspGetDeviceTime{
+   RspStatus status = 1;
+   int64 timestampUTC = 2;
+   string localeDatetime = 3;
+}
+
+message ReqGetLocation{
+}
+message RspGetLocation{
+   RspStatus status = 1;
+   double alt = 2;
+   double lat = 3;
+}
+
+message ReqKey{
+   enum KeyType{
+      BACK = 0;
+      MENU = 1;
+      HOME = 2;
+      VOLUP = 3;
+      VOLDOWN = 4;
+      POWER = 5;
+      //KEY = 6;
+      XF86 = 7;
+      WHEELUP = 8;
+      WHEELDOWN = 9;
+   }
+   enum KeyActionType{
+      STROKE = 0;
+      LONG_STROKE = 1;
+      PRESS = 2;
+      RELEASE = 3;
+   }
+   KeyType type = 1;
+   KeyActionType actionType = 2;
+   //oneof keys {
+      //uint32 keyCode = 3;
+   string XF86keyCode = 4;
+   //}
+}
+message RspKey{
+   RspStatus status = 1;
+}
+
+message ReqTakeScreenshot{
+}
+message RspTakeScreenshot{
+   bytes image = 1;
+}
+
+// ------------------------------------ //
+
+message ReqEmpty {
+}
+message RspEmpty {
+}
+
+// ------------------------------------ //
+
+message ReqDumpObjectTree {
+   string elementId = 1;
+}
+
+message RspDumpObjectTree {
+   RspStatus status = 1;
+   repeated Element roots = 2;
+}
