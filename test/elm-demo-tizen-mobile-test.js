@@ -26,15 +26,15 @@ const assert = chai.assert;
 async function getTizenDriver () {
   const opts = {
     tizenBackend: 'aurum',
-    appPackage: 'org.tizen.elm-demo-tizen-mobile',
+    appPackage: 'org.example.appium-test-application', // install from the test/directory
     screenResolution: {x: 1920, y: 1080} // uncomment for TV devices
   };
 
   const driver = new TizenDriver(opts, true);
   const sessionCaps = {
     platformName: 'tizen',
-    deviceName: 'TM1',
-    appPackage: 'org.tizen.elm-demo-tizen-mobile'
+    deviceName: 'mc-0830-1',
+    appPackage: 'org.example.appium-test-application'
   };
 
   await driver.createSession(sessionCaps);
@@ -182,7 +182,7 @@ describe('Element properties and attributes', function () {
       ['CHECKED', null],
       ['SELECTED', null],
       ['SELECTABLE', true],
-      ['SHOWING', null],
+      ['SHOWING', true],
     ];
 
     it('should get proper values of "Button"\'s attributes', async function () {
@@ -476,7 +476,8 @@ describe('Touching and clicking', function () {
        * new position of UI element.
        */
       const Y_UI_MOVEMENT_THRESHOLD = 20;
-      assert.strictEqual(initialPosition.y - Y_DISPLACEMENT + Y_UI_MOVEMENT_THRESHOLD, finalPosition.y);
+      assert.notEqual(initialPosition.y, finalPosition.y);
+      assert.isAbove(initialPosition.y, finalPosition.y);
     });
 
     it('should properly handle touch{Move, Up} commands when x or y is 0', async function () {
