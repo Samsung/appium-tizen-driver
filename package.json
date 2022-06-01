@@ -70,7 +70,7 @@
         "eslint": "^7.9.0",
         "eslint-config-appium": "^4.5.0",
         "eslint-plugin-import": "^2.2.0",
-        "eslint-plugin-mocha": "^8.0.0",
+        "eslint-plugin-mocha": "^10.0.5",
         "eslint-plugin-promise": "^4.0.0",
         "gulp": "^4.0.0",
         "pre-commit": "^1.1.3"
